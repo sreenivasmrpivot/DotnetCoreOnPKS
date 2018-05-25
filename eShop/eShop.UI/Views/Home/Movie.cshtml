@@ -1,0 +1,16 @@
+@model IEnumerable<eShop.UI.Models.Movie>
+
+@{
+    ViewData["Title"] = "Movies";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>Movies</p>
+
+<ul>
+    @foreach (var mov in Model)
+    {
+        <li>@mov.Name</li>
+    }
+</ul>

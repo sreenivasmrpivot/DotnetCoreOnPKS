@@ -1,0 +1,23 @@
+@model eShop.UI.Models.eShopData
+
+@{
+    ViewData["Title"] = "eShop";
+}
+<h2>@ViewData["Title"]</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>e Shop</p>
+
+<ul>
+    @foreach (var prod in Model.Products)
+    {
+        <li>@prod.Name</li>
+    }
+</ul>
+
+<ul>
+    @foreach (var mov in Model.Movies)
+    {
+        <li>@mov.Name</li>
+    }
+</ul>

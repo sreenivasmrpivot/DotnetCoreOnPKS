@@ -1,0 +1,157 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: eshopcatalog
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: eshopcatalog
+    spec:
+      containers:
+      - name: eshopcatalog
+        image: registry.harbor.smanyamr.com/dotnetcore-101/eshop.catalog:v2.0.0
+        ports:
+        - containerPort: 80
+          name: eshopcatalog
+      imagePullSecrets:
+      - name: smanharborconsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshopcatalog
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: eshopcatalog
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: eshopmovies
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: eshopmovies
+    spec:
+      containers:
+      - name: eshopmovies
+        image: registry.harbor.smanyamr.com/dotnetcore-101/eshop.movies:v1.0.0
+        ports:
+        - containerPort: 80
+          name: eshopmovies
+      imagePullSecrets:
+      - name: smanharborconsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshopmovies
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: eshopmovies
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: eshopusers
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: eshopusers
+    spec:
+      containers:
+      - name: eshopusers
+        image: registry.harbor.smanyamr.com/dotnetcore-101/eshop.users:v1.0.0
+        ports:
+        - containerPort: 80
+          name: eshopusers
+      imagePullSecrets:
+      - name: smanharborconsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshopusers
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: eshopusers
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: eshop-ui
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: eshop-ui
+    spec:
+      containers:
+      - name: eshop-ui
+        image: registry.harbor.smanyamr.com/dotnetcore-101/eshop.ui:v2.0.0
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        env:
+          - name: ESHOP_CATALOG_API_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: eshop-ui-config
+                key: apiendpoint.eshopcatalog
+          - name: ESHOP_MOVIES_API_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: eshop-ui-config
+                key: apiendpoint.eshopmovies
+          - name: ESHOP_USERS_API_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: eshop-ui-config
+                key: apiendpoint.eshopusers
+      imagePullSecrets:
+      - name: smanharborconsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eshop-ui
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: eshop-ui
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eshop-ui-config
+data:
+  apiendpoint.eshopcatalog: http://35.190.153.22/api/products
+  apiendpoint.eshopmovies: http://35.185.40.41/api/movies
+  apiendpoint.eshopusers: 35.229.73.255
